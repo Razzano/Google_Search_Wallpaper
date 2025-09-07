@@ -54,7 +54,7 @@
         dayord = DayOrd.split(','),
         wallpaperImageText = 'Wallpaper image',
         changeWallpaperTooltip = 'Change Wallpaper',
-        inputTooltip = '0 - 51',
+        inputTooltip = '0 - 52',
         githubSite = 'https://raw.githubusercontent.com/Razzano/My_Wallpaper_Images/master/image',
         imgCalendar = 'https://raw.githubusercontent.com/Razzano/My_Images/master/imageCalendar.png',
         imgClock = 'https://raw.githubusercontent.com/Razzano/My_Images/master/imageClock32.png',
@@ -239,12 +239,12 @@
         sub = parseInt(num1 - 1);
     switch (e.target.id) {
       case 'buttonThemer':
-        if (inp.value > 50) inp.value = 0;
+        if (inp.value > 51) inp.value = 0;
         else inp.value = sum;
         break;
       case 'buttonDown':
         if (inp.value > 0) inp.value = sub;
-        else inp.value = 51;
+        else inp.value = 52;
     }
     GM_setValue('wallpaperImage', inp.value);
     wallpaper(inp.value);
@@ -252,7 +252,7 @@
 
   function wallpaperInputChanger(e) {
     let inp = $q('#inputThemer');
-    if (inp.value > 51) inp.value = 51;
+    if (inp.value > 52) inp.value = 52;
     else if (inp.value < 0) inp.value = 0;
     else inp.value = inp.value;
     GM_setValue('wallpaperImage', inp.value);
@@ -283,6 +283,7 @@
     'body#gsr {'+
     '  background:  url(' + githubSite + GM_getValue('wallpaperImage') +'.jpg) no-repeat center / cover fixed !important;'+
     '}'+
+    'body#gsr #gb > div.gb_td.gb_0.gb_I > div,'+
     'body#gsr div.logo,'+
     'body#gsr picture > img {'+
     '  display: none !important;'+

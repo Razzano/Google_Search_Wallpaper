@@ -89,6 +89,30 @@
     return refNode.parentNode.appendChild(newNode);
   }
 
+  function init() {
+    window.removeEventListener('load', () => init());
+    try {
+      divThemer.appendChild(btnThemer);
+      divThemer.appendChild(inpThemer);
+      divThemer.appendChild(btnDown);
+      div1.insertBefore(divThemer, div1.firstChild);
+      dateTimeContainer.appendChild(imageCalendar);
+      dateTimeContainer.appendChild(dateTime);
+      insertAfter(dateTimeContainer, div1.firstChild.nextSibling);
+      if (GM_getValue('defaultDateTimeView')) dateTimeDefault();
+      else {dateTime.hidden = true; clearInterval(clockInterval)}
+      dateTime.title = getText();
+      searchLinksWhere();
+      wallpaper(GM_getValue('wallpaperImage'));
+    } catch(ex) {}
+  }
+
+  function onClose() {
+    clearInterval(initInterval);
+    clearInterval(clockInterval);
+    window.removeEventListener('unload', () => onClose());
+  }
+
   function dateTimeFormat(int) {
     if (!GM_getValue('defaultDateTimeView')) return;
     let date = new Date(),
@@ -187,50 +211,46 @@
     return addRemoveText + '"' + target + '"';;
   }
 
-  function init() {
-    window.removeEventListener('load', () => init());
-    try {
-      divThemer.appendChild(btnThemer);
-      divThemer.appendChild(inpThemer);
-      divThemer.appendChild(btnDown);
-      div1.insertBefore(divThemer, div1.firstChild);
-      dateTimeContainer.appendChild(imageCalendar);
-      dateTimeContainer.appendChild(dateTime);
-      insertAfter(dateTimeContainer, div1.firstChild.nextSibling);
-      if (GM_getValue('defaultDateTimeView')) dateTimeDefault();
-      else {dateTime.hidden = true; clearInterval(clockInterval)}
-      dateTime.title = getText();
-      searchLinksWhere();
-      wallpaper(GM_getValue('wallpaperImage'));
-    } catch(ex) {}
-  }
-
-  function onClose() {
-    clearInterval(initInterval);
-    clearInterval(clockInterval);
-    window.removeEventListener('unload', () => onClose());
-  }
-
   function searchLinksWhere() {
     let links = $q('body#gsr a', true);
     for (let i = 0; i < links.length; i++) links[i].setAttribute('target', GM_getValue('linkTarget'));
     getText();
   }
 
+  function removeCurrentWallpaper() {
+    const existing = document.getElementById('custom-wallpaper-style');
+    if (existing) existing.remove();
+  }
+
   function wallpaper(e) {
+    removeCurrentWallpaper();
     if (e === 0) {
-      GM_addStyle(''+
-        'body#gsr {'+
-        '  background: initial !important;'+
-        '}'+
-      '');
-    } else {
-      GM_addStyle(''+
-        'body#gsr {'+
-        '  background:  url(' + githubSite + e +'.jpg) no-repeat center / cover fixed !important;'+
-        '}'+
-      '');
-  } }
+      GM_addStyle(`
+        body#gsr {
+          background: initial !important;
+        }
+      `, 'custom-wallpaper-style');
+      return;
+    }
+    const imageUrl = `${githubSite}${e}.jpg`;
+    const img = new Image();
+    img.onload = () => {
+      GM_addStyle(`
+        body#gsr {
+          background: url("${imageUrl}") no-repeat center center / cover fixed !important;
+        }
+      `, 'custom-wallpaper-style');
+    };
+    img.onerror = () => {
+      console.warn(`Wallpaper ${e} failed to load: ${imageUrl}`);
+      GM_addStyle(`
+        body#gsr {
+          background: initial !important;
+        }
+      `, 'custom-wallpaper-style');
+    };
+    img.src = imageUrl;
+  }
 
   function wallpaperButtonChanger(e) {
     let inp = $q('#inputThemer'),
@@ -278,187 +298,194 @@
 
   window.addEventListener('load', () => init());
   window.addEventListener('unload', () => onClose());
-
-  GM_addStyle(''+
-    'body#gsr {'+
-    '  background:  url(' + githubSite + GM_getValue('wallpaperImage') +'.jpg) no-repeat center / cover fixed !important;'+
-    '}'+
-    'body#gsr #gb > div.gb_td.gb_0.gb_I > div,'+
-    'body#gsr div.logo,'+
-    'body#gsr picture > img {'+
-    '  display: none !important;'+
-    '}'+
-    'body#gsr #cnt > div.JryvJ > div {'+
-    '  border-bottom: none !important;'+
-    '}'+
-    'body#gsr #searchform {'+
-    '  background: #000 !important;'+
-    '}'+
-    'body#gsr #hdtb-sc {'+
-    '  margin-top: 30px !important;'+
-    '}'+
-    'body#gsr #themerDiv {'+
-    '  background: transparent !important;'+
-    '  color: #FFF !important;'+
-    '  left: 8px !important;'+
-    '  position: fixed !important;'+
-    '  top: 10px !important;'+
-    '  z-index: 900 !important;'+
-    '}'+
-    'body#gsr #buttonThemer,'+
-    'body#gsr #inputThemer {'+
-    '  border: none !important;'+
-    '  color: #FFF !important;'+
-    '  opacity: .7 !important;'+
-    '  text-shadow: 1px 1px 2px #000 !important;'+
-    '}'+
-    'body#gsr #buttonThemer {'+
-    '  background-color: transparent !important;'+
-    '  background-repeat: no-repeat !important;'+
-    '  background-position: right !important;'+
-    '  margin: 0 !important;'+
-    '  position: relative !important;'+
-    '  top: -1px !important;'+
-    '  width: 115px !important;'+
-    '}'+
-    'body#gsr #inputThemer {'+
-    '  background: transparent !important;'+
-    '  margin: 0 !important;'+
-    '  width: 20px !important;'+
-    '  text-align: center !important;'+
-    '}'+
-    'body#gsr #buttonDown {'+
-    '  background: transparent !important;'+
-    '  border: none !important;'+
-    '  color: #FFF !important;'+
-    '  opacity: .7 !important;'+
-    '  cursor: pointer !important;'+
-    '  height: 10px !important;'+
-    '  margin: 0 !important;'+
-    '  position: relative !important;'+
-    '  text-shadow: 1px 1px 2px #000 !important;'+
-    '  top: 0 !important;'+
-    '  width: 11px !important;'+
-    '}'+
-    'body#gsr #buttonThemer:hover,'+
-    'body#gsr #buttonDown:hover {'+
-    '  opacity: 1 !important;'+
-    '  cursor: pointer !important;'+
-    '}'+
-    'body#gsr #inputThemer::-webkit-inner-spin-button,'+
-    'body#gsr #inputThemer::-webkit-outer-spin-button,'+
-    'body#gsr #inputThemer::-webkit-inner-spin-button,'+
-    'body#gsr #inputThemer::-webkit-outer-spin-button {'+
-    '  display: none !important;'+
-    '}'+
-    'body#gsr #dateTimeContainer {'+
-    '  position: relative !important;'+
-    '  width: 415px !important;'+
-    '  z-index: 999 !important;'+
-    '}'+
-    'body#gsr #gCalendar {'+
-    '  border: none !important;'+
-    '  cursor: pointer !important;'+
-    '  filter: grayscale(1) brightness(.65) !important;'+
-    '  height: 40px !important;'+
-    '  width: 40px !important;'+
-    '}'+
-    'body#gsr #dateTime {'+
-    '  margin: 0 !important;'+
-    '  position: relative !important;'+
-    '  top: -14px !important;'+
-    '}'+
-    'body#gsr #gCalendar:hover + #dateTime {'+
-    '  background: #900 !important;'+
-    '  border-color: #C00 !important;'+
-    '  color: #FFF !important;'+
-    '}'+
-    'body#gsr #dateTimeContainer:hover > #gCalendar {'+
-    '  filter: none !important;'+
-    '  opacity: .7 !important;'+
-    '}'+
-    'body#gsr #dateTimeContainer:hover > #gCalendar:hover {'+
-    '  opacity: 1 !important;'+
-    '}'+
-    'body#gsr #dateTimeContainer > #dateTime {'+
-    '  background-color: transparent !important;'+
-    '  border: 1px solid transparent !important;'+
-    '  border-radius: 4px !important;'+
-    '  box-shadow: none !important;'+
-    '  color: #FFF !important;'+
-    '  cursor: pointer !important;'+
-    '  font: 14px monospace !important;'+
-    '  min-width: 100px !important;'+
-    '  padding: 5px 8px 6px 8px !important;'+
-    '  text-shadow: 1px 1px 2px #000 !important;'+
-    '}'+
-    'body#gsr #dateTimeContainer > #dateTime:hover {'+
-    '  background-color: #181A1B !important;'+
-    '  border: 1px solid #000 !important;'+
-    '}'+
-    'body#gsr #gb > div.gb_cd.gb_0.gb_I > div {'+
-    '  display: none !important;'+
-    '}'+
-    'body#gsr #gbwa > div,'+
-    'body#gsr #gb > div.gb_z {'+
-    '  padding: 0 !important;'+
-    '}'+
-    'body#gsr #gbwa > div > a:hover {'+
-    '  background-color: #181A1B !important;'+
-    '  border: 1px solid #333 !important;'+
-    '  color: #FFF !important;'+
-    '}'+
-    'body#gsr .gb_Aa {'+
-    '  height: 40px !important;'+
-    '  position: relative !important;'+
-    '  top: -4px !important;'+
-    '  width: 40px !important;'+
-    '}'+
-    'body#gsr .logo,'+
-    'body#gsr .XDyW0e,'+
-    'body#gsr #footcnt {'+
-    '  display: none !important;'+
-    '}'+
-    'body#gsr .sfbg {'+
-    '  opacity: 0 !important;'+
-    '}'+
-    'body#gsr .sfbg,'+
-    'body#gsr #pTwnEc,'+
-    'body#gsr .appbar,'+
-    'body#gsr #searchform div:last-of-type:not(.Q3DXx) {'+
-    '  background: transparent !important;'+
-    '}'+
-    'body#gsr #searchform > div.NDnoQ.P3mIxe{'+
-    '  background: #000 !important;'+
-    '}'+
-    'body#gsr > #searchform {'+
-    '  margin-top: -2px !important;'+
-    '  top: 0 !important;'+
-    '}'+
-    'body#gsr .RNNXgb {'+
-    '  border-radius: 24px !important;'+
-    '  margin: 0 !important;'+
-    '  width: 90% !important;'+
-    '}'+
-    'body#gsr .minidiv .RNNXgb {'+
-    '  border-radius: 24px !important;'+
-    '  margin: 0 !important;'+
-    '  padding: 6px 0 !important;'+
-    '  width: 90% !important;'+
-    '}'+
-    'body#gsr .GLcBOb {'+
-    '  border-bottom: none !important;'+
-    '}'+
-    'body#gsr #rcnt {'+
-    '  background: radial-gradient(#000, transparent) !important;'+
-    '}'+
-    'body#gsr #gb > div > div[style*="width: 328px;"] {'+
-    '  height: calc(-140px + 100vh) !important;'+
-    '}'+
-    'body#gsr div.dodTBe {'+
-    '  height: auto !important;'+
-    '  min-height: 0 !important;'+
-    '}'+
-  '');
-
+  let e = GM_getValue('wallpaperImage');
+  const imageUrl = `${githubSite}${e}.jpg`;
+  GM_addStyle(`
+    body#gsr {
+      background-image: url(${imageUrl}) !important;
+    }
+    body#gsr .xrOgrb {
+     padding-top: 0px !important;
+    }
+    body#gsr #searchform {
+      position: relative !important;
+      top: -10px !important;
+    }
+    body#gsr #gb > div.gb_td.gb_0.gb_I > div,
+    body#gsr div.logo,
+    body#gsr picture > img {
+      display: none !important;
+    }
+    body#gsr #cnt > div.JryvJ > div {
+      border-bottom: none !important;
+    }
+    body#gsr #searchform {
+      background: #000 !important;
+    }
+    body#gsr #hdtb-sc {
+      margin-top: 30px !important;
+    }
+    body#gsr #themerDiv {
+      background: transparent !important;
+      color: #FFF !important;
+      left: 8px !important;
+      position: fixed !important;
+      top: 10px !important;
+      z-index: 900 !important;
+    }
+    body#gsr #buttonThemer,
+    body#gsr #inputThemer {
+      border: none !important;
+      color: #FFF !important;
+      opacity: .7 !important;
+      text-shadow: 1px 1px 2px #000 !important;
+    }
+    body#gsr #buttonThemer {
+      background-color: transparent !important;
+      background-repeat: no-repeat !important;
+      background-position: right !important;
+      margin: 0 !important;
+      position: relative !important;
+      top: -1px !important;
+      width: 115px !important;
+    }
+    body#gsr #inputThemer {
+      background: transparent !important;
+      margin: 0 !important;
+      width: 20px !important;
+      text-align: center !important;
+    }
+    body#gsr #buttonDown {
+      background: transparent !important;
+      border: none !important;
+      color: #FFF !important;
+      opacity: .7 !important;
+      cursor: pointer !important;
+      height: 10px !important;
+      margin: 0 !important;
+      position: relative !important;
+      text-shadow: 1px 1px 2px #000 !important;
+      top: 0 !important;
+      width: 11px !important;
+    }
+    body#gsr #buttonThemer:hover,
+    body#gsr #buttonDown:hover {
+      opacity: 1 !important;
+      cursor: pointer !important;
+    }
+    body#gsr #inputThemer::-webkit-inner-spin-button,
+    body#gsr #inputThemer::-webkit-outer-spin-button,
+    body#gsr #inputThemer::-webkit-inner-spin-button,
+    body#gsr #inputThemer::-webkit-outer-spin-button {
+      display: none !important;
+    }
+    body#gsr #dateTimeContainer {
+      position: relative !important;
+      width: 415px !important;
+      z-index: 999 !important;
+    }
+    body#gsr #gCalendar {
+      border: none !important;
+      cursor: pointer !important;
+      filter: grayscale(1) brightness(.65) !important;
+      height: 40px !important;
+      width: 40px !important;
+    }
+    body#gsr #dateTime {
+      margin: 0 !important;
+      position: relative !important;
+      top: -14px !important;
+    }
+    body#gsr #gCalendar:hover + #dateTime {
+      background: #900 !important;
+      border-color: #C00 !important;
+      color: #FFF !important;
+    }
+    body#gsr #dateTimeContainer:hover > #gCalendar {
+      filter: none !important;
+      opacity: .7 !important;
+    }
+    body#gsr #dateTimeContainer:hover > #gCalendar:hover {
+      opacity: 1 !important;
+    }
+    body#gsr #dateTimeContainer > #dateTime {
+      background-color: transparent !important;
+      border: 1px solid transparent !important;
+      border-radius: 4px !important;
+      box-shadow: none !important;
+      color: #FFF !important;
+      cursor: pointer !important;
+      font: 14px monospace !important;
+      min-width: 100px !important;
+      padding: 5px 8px 6px 8px !important;
+      text-shadow: 1px 1px 2px #000 !important;
+    }
+    body#gsr #dateTimeContainer > #dateTime:hover {
+      background-color: #181A1B !important;
+      border: 1px solid #000 !important;
+    }
+    body#gsr #gb > div.gb_cd.gb_0.gb_I > div {
+      display: none !important;
+    }
+    body#gsr #gbwa > div,
+    body#gsr #gb > div.gb_z {
+      padding: 0 !important;
+    }
+    body#gsr #gbwa > div > a:hover {
+      background-color: #181A1B !important;
+      border: 1px solid #333 !important;
+      color: #FFF !important;
+    }
+    body#gsr .gb_Aa {
+      height: 40px !important;
+      position: relative !important;
+      top: -4px !important;
+      width: 40px !important;
+    }
+    body#gsr .logo,
+    body#gsr .XDyW0e,
+    body#gsr #footcnt {
+      display: none !important;
+    }
+    body#gsr .sfbg {
+      opacity: 0 !important;
+    }
+    body#gsr .sfbg,
+    body#gsr #pTwnEc,
+    body#gsr .appbar,
+    body#gsr #searchform div:last-of-type:not(.Q3DXx) {
+      background: transparent !important;
+    }
+    body#gsr #searchform > div.NDnoQ.P3mIxe{
+      background: #000 !important;
+    }
+    body#gsr > #searchform {
+      margin-top: -2px !important;
+      top: 0 !important;
+    }
+    body#gsr .RNNXgb {
+      border-radius: 24px !important;
+      margin: 0 !important;
+      width: 90% !important;
+    }
+    body#gsr .minidiv .RNNXgb {
+      border-radius: 24px !important;
+      margin: 0 !important;
+      padding: 6px 0 !important;
+      width: 90% !important;
+    }
+    body#gsr .GLcBOb {
+      border-bottom: none !important;
+    }
+    body#gsr #rcnt {
+      background: radial-gradient(#000, transparent) !important;
+    }
+    body#gsr #gb > div > div[style*="width: 328px;"] {
+      height: calc(-140px + 100vh) !important;
+    }
+    body#gsr div.dodTBe {
+      height: auto !important;
+      min-height: 0 !important;
+    }
+  `);
 })();

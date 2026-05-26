@@ -5,13 +5,15 @@
 // @description  Layout and Theme
 // @author       Sonny Razzano a.k.a. srazzano
 // @match        https://www.google.com/search*
+// @match        https://google.com/search*
 // @icon         https://raw.githubusercontent.com/srazzano/Images/master/googleicon64.png
 // @grant        GM_addStyle
 // @grant        GM_getValue
 // @grant        GM_setValue
+// @run-at       document-start
 // ==/UserScript==
 
-(function() {
+(() => {
 
   'use strict';
 
@@ -61,7 +63,8 @@
         downArrow = 'https://raw.githubusercontent.com/Razzano/My_Images/master/downArrow.png',
         upArrow = 'https://raw.githubusercontent.com/Razzano/My_Images/master/upArrow.png',
         body = $q('body#gsr'),
-        div1 = $q('#searchform > div.NDnoQ.P3mIxe'),
+        div1 = $q('#searchform'),
+        form = $q('#searchform form'),
         divThemer = $c('div', {id: 'themerDiv'}),
         btnThemer = $c('button', {id: 'buttonThemer', innerHTML: wallpaperImageText, title: changeWallpaperTooltip, onclick: e => wallpaperButtonChanger(e)}),
         inpThemer = $c('input', {id: 'inputThemer', type: 'number', value: GM_getValue('wallpaperImage'), title: inputTooltip, oninput: e => wallpaperInputChanger(e)}),
@@ -98,7 +101,7 @@
       div1.insertBefore(divThemer, div1.firstChild);
       dateTimeContainer.appendChild(imageCalendar);
       dateTimeContainer.appendChild(dateTime);
-      insertAfter(dateTimeContainer, div1.firstChild.nextSibling);
+      insertAfter(dateTimeContainer, form);
       if (GM_getValue('defaultDateTimeView')) dateTimeDefault();
       else {dateTime.hidden = true; clearInterval(clockInterval)}
       dateTime.title = getText();
@@ -302,7 +305,7 @@
   const imageUrl = `${githubSite}${e}.jpg`;
   GM_addStyle(`
     body#gsr {
-      background-image: url(${imageUrl}) !important;
+      background: url(${imageUrl}) no-repeat center center / cover fixed !important;
     }
     body#gsr .xrOgrb {
      padding-top: 0px !important;

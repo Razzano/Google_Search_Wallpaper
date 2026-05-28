@@ -79,25 +79,21 @@
 
   const githubSite = 'https://raw.githubusercontent.com/Razzano/My_Wallpaper_Images/master/image';
 
-  let initInterval;
-
-  const removeCurrentWallpaper = () => {
-    const existing = document.getElementById('custom-wallpaper-style');
-    if (existing) existing.remove();
-  }
-
+  let currentWallpaperStyle = null;
   const applyWallpaper = (num) => {
-    removeCurrentWallpaper();
+    if (currentWallpaperStyle) {
+      currentWallpaperStyle.remove();
+      currentWallpaperStyle = null;
+    }
     num = parseInt(num) || 0;
-    if (num === 0) {
-      GM_addStyle(`body#gsr { background: initial !important; }`);
-    } else {
-      GM_addStyle(`
-        body#gsr {
-          background: url(${githubSite}${num}.jpg) no-repeat center center / cover fixed !important;
-        }
-      `);
-  } }
+    if (num === 0) return;
+    const css = `
+      body#gsr {
+        background: url(${githubSite}${num}.jpg) no-repeat center center / cover fixed !important;
+      }
+    `;
+    currentWallpaperStyle = GM_addStyle(css);
+  };
 
   const wallpaperButtonChanger = (e) => {
     let inp = $q('#inputThemer'),
@@ -127,22 +123,16 @@
     applyWallpaper(val);
   }
 
-  const wallpaperSite = () => {
-    let num = GM_getValue('wallpaperImage');
-    applyWallpaper(num);
-  }
-
   const init = () => {
     const body = document.body;
     if (!body) return;
-    const form = $q('form');
+    const form = $id('tsf');
     const divThemer = $c('div', {
       id: 'divThemer'
     });
     const buttonUpThemer = $c('button', {
       id: 'buttonUpThemer',
       textContent: 'Wallpaper image',
-      style: `background-image: url(https://raw.githubusercontent.com/Razzano/My_Images/master/upArrow.png) !important;`,
       title: 'Change Wallpaper',
       onclick: wallpaperButtonChanger
     });
@@ -156,18 +146,15 @@
     const buttonDownThemer = $c('button', {
       id: 'buttonDownThemer',
       textContent: 'Wallpaper image',
-      style: `background-image: url(https://raw.githubusercontent.com/Razzano/My_Images/master/downArrow.png) !important;`,
       title: 'Change Wallpaper',
       onclick: e => wallpaperButtonChanger(e)
     });
-    divThemer.appendChild(buttonUpThemer);
-    divThemer.appendChild(inputThemer);
-    divThemer.appendChild(buttonDownThemer);
+    divThemer.append(buttonUpThemer, inputThemer, buttonDownThemer);
     insertAfter(divThemer, form);
     applyWallpaper(GM_getValue('wallpaperImage'));
   }
 
-  if (!GM_getValue('wallpaperImage')) GM_setValue('wallpaperImage', 0);
+  if (GM_getValue('wallpaperImage') === undefined) GM_setValue('wallpaperImage', 0);
 
   if (document.readyState === "loading") {
     document.addEventListener('DOMContentLoaded', init);
@@ -178,9 +165,9 @@
   let e = GM_getValue('wallpaperImage');
   const imageUrl = `${githubSite}${e}.jpg`;
   GM_addStyle(`
-    body#gsr {
+    /*body#gsr {
       background: url(${imageUrl}) no-repeat center center / cover fixed !important;
-    }
+    }*/
     body#gsr .xrOgrb {
      padding-top: 0px !important;
     }
@@ -207,10 +194,12 @@
       background: transparent !important;
       color: #FFF !important;
       cursor: pointer !important;
-      margin: 0px !important;
-      padding: 12px 0 0 0 !important;
+      margin: auto !important;
+      padding: 0px !important;
+      transform: translateX(-80%) !important;
     }
     body#gsr #buttonUpThemer {
+      background-image: url(https://raw.githubusercontent.com/Razzano/My_Images/master/upArrow.png) !important;
       background-color: transparent !important;
       background-repeat: no-repeat !important;
       background-position: right !important;
@@ -237,6 +226,7 @@
       height: 36px !important;
     }
     body#gsr #buttonDownThemer {
+      background-image: url(https://raw.githubusercontent.com/Razzano/My_Images/master/downArrow.png) !important;
       background-color: transparent !important;
       background-repeat: no-repeat !important;
       background-position: left !important;
@@ -306,13 +296,6 @@
     body#gsr .RNNXgb {
       border-radius: 24px !important;
       margin: 0 !important;
-      width: 90% !important;
-    }
-    body#gsr .minidiv .RNNXgb {
-      border-radius: 24px !important;
-      margin: 0 !important;
-      padding: 6px 0 !important;
-      width: 90% !important;
     }
     body#gsr .GLcBOb {
       border-bottom: none !important;

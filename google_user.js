@@ -70,26 +70,14 @@
   };
 
   const removeDupes = (className) => {
-    $qa('.' + className).forEach((el, i) => {
+    document.querySelectorAll('.' + className).forEach((el, i) => {
       if (i > 0) {
         el.remove();
       }
     });
   };
 
-  const delayInit = 100,
-        wallpaperText = 'Wallpaper image',
-        wallpaperTooltip = 'Change Wallpaper',
-        inputTooltip = '0 - 52',
-        githubSite = 'https://raw.githubusercontent.com/Razzano/My_Wallpaper_Images/master/image',
-        downArrow = 'https://raw.githubusercontent.com/Razzano/My_Images/master/downArrow.png',
-        upArrow = 'https://raw.githubusercontent.com/Razzano/My_Images/master/upArrow.png',
-        searchform = $id('searchform'),
-        form = $q('form'),
-        divThemer = $c('div', {id: 'themerDiv'}),
-        btnThemer = $c('button', {id: 'buttonThemer', innerHTML: wallpaperText, style: `background-image: url(${upArrow}) !important;`, title: wallpaperTooltip, onclick: e => wallpaperButtonChanger(e)}),
-        inpThemer = $c('input', {id: 'inputThemer', type: 'number', value: GM_getValue('wallpaperImage'), title: inputTooltip, oninput: e => wallpaperInputChanger(e)}),
-        btnDown = $c('button', {id: 'buttonDown', innerHTML: wallpaperText, style: `background-image: url(${downArrow}) !important;`, title: '', onclick: e => wallpaperButtonChanger(e)});
+  const githubSite = 'https://raw.githubusercontent.com/Razzano/My_Wallpaper_Images/master/image';
 
   let initInterval;
 
@@ -144,36 +132,39 @@
     applyWallpaper(num);
   }
 
-  const setThemer = () => {
+  const init = () => {
     const body = document.body;
     if (!body) return;
-    divThemer.appendChild(btnThemer);
-    divThemer.appendChild(inpThemer);
-    divThemer.appendChild(btnDown);
-    //searchform.insertBefore(divThemer, searchform.firstChild);
+    const form = $q('form');
+    const divThemer = $c('div', {
+      id: 'divThemer'
+    });
+    const buttonUpThemer = $c('button', {
+      id: 'buttonUpThemer',
+      textContent: 'Wallpaper image',
+      style: `background-image: url(https://raw.githubusercontent.com/Razzano/My_Images/master/upArrow.png) !important;`,
+      title: 'Change Wallpaper',
+      onclick: wallpaperButtonChanger
+    });
+    const inputThemer = $c('input', {
+      id: 'inputThemer',
+      type: 'number',
+      value: GM_getValue('wallpaperImage', 0),
+      title: '0 - 52',
+      oninput: wallpaperInputChanger
+    });
+    const buttonDownThemer = $c('button', {
+      id: 'buttonDownThemer',
+      textContent: 'Wallpaper image',
+      style: `background-image: url(https://raw.githubusercontent.com/Razzano/My_Images/master/downArrow.png) !important;`,
+      title: 'Change Wallpaper',
+      onclick: e => wallpaperButtonChanger(e)
+    });
+    divThemer.appendChild(buttonUpThemer);
+    divThemer.appendChild(inputThemer);
+    divThemer.appendChild(buttonDownThemer);
     insertAfter(divThemer, form);
     applyWallpaper(GM_getValue('wallpaperImage'));
-  }
-
-  const init = () => {
-    const observer = new MutationObserver(() => {
-      const searchform = $id('searchform');
-      if (searchform) {
-        observer.disconnect();
-        setThemer();
-      }
-    });
-    observer.observe(document.documentElement, {
-      childList: true,
-      subtree: true
-    });
-    setTimeout(() => {
-      const searchform = $id('searchform');
-      if (searchform) {
-        observer.disconnect();
-        setThemer();
-      }
-    }, delayInit);
   }
 
   if (!GM_getValue('wallpaperImage')) GM_setValue('wallpaperImage', 0);
@@ -212,14 +203,14 @@
     body#gsr #hdtb-sc {
       margin-top: 30px !important;
     }
-    body#gsr #themerDiv {
+    body#gsr #divThemer {
       background: transparent !important;
       color: #FFF !important;
       cursor: pointer !important;
       margin: 0px !important;
       padding: 12px 0 0 0 !important;
     }
-    body#gsr #buttonThemer {
+    body#gsr #buttonUpThemer {
       background-color: transparent !important;
       background-repeat: no-repeat !important;
       background-position: right !important;
@@ -245,7 +236,7 @@
       width: 30px !important;
       height: 36px !important;
     }
-    body#gsr #buttonDown {
+    body#gsr #buttonDownThemer {
       background-color: transparent !important;
       background-repeat: no-repeat !important;
       background-position: left !important;
@@ -261,8 +252,8 @@
       width: 140px !important;
       height: 36px !important;
     }
-    body#gsr #buttonThemer:hover,
-    body#gsr #buttonDown:hover,
+    body#gsr #buttonUpThemer:hover,
+    body#gsr #buttonDownThemer:hover,
     body#gsr #inputThemer:hover,
     body#gsr #inputThemer:focus-within {
       opacity: 1 !important;
@@ -336,8 +327,8 @@
     body#gsr .jOAHU {
       border-left: none !important;
     }
-    body#gsr #gb > div > div[style*="width: 328px;"] {
-      height: calc(-140px + 100vh) !important;
+    body#gsr #gb > div.gb_z > div:nth-child(2) {
+      height: calc(-70px + 100vh) !important;
     }
     body#gsr div.dodTBe {
       height: auto !important;

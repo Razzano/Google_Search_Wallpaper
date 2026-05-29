@@ -55,6 +55,8 @@
 
   const $qa = (sel, ctx = document) => Array.from(ctx?.querySelectorAll(sel) ?? []);
 
+  const githubSite = 'https://raw.githubusercontent.com/Razzano/My_Wallpaper_Images/master/image';
+
   const insertAfter = (newEl, refEl) => {
     if (!refEl || !refEl.parentNode) {
       console.warn('insertAfter: refEl is null or has no parentNode', refEl);
@@ -76,8 +78,6 @@
       }
     });
   };
-
-  const githubSite = 'https://raw.githubusercontent.com/Razzano/My_Wallpaper_Images/master/image';
 
   let currentWallpaperStyle = null;
   const applyWallpaper = (num) => {
@@ -126,7 +126,7 @@
   const init = () => {
     const body = document.body;
     if (!body) return;
-    const form = $id('tsf');
+    const form = $q('form, #tsf');
     const divThemer = $c('div', {
       id: 'divThemer'
     });
